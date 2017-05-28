@@ -99,6 +99,12 @@ def parse_input_kmers(fname):
     kmers = workfile.readlines()
     return map(lambda x: x.strip(), kmers)
 
+def parse_input_kdmers(fname):
+    workfile = open(fname, 'r')
+    [k, gap] = map(int, workfile.readline().strip().split(' '))
+    kmers = map(lambda x: x.strip().split('|'), workfile.readlines())
+    return (k, gap, kmers)
+
 ##############################################################
 
 def de_bruijn_graph(kmers):
@@ -106,6 +112,14 @@ def de_bruijn_graph(kmers):
 
     for kmer in kmers:
         graph[kmer[:-1]].add(kmer[1:])
+
+    return graph
+
+def kd_de_bruijn_graph(kmers):
+    graph = collections.defaultdict(set)
+
+    for kmer in kmers:
+        graph[(kmer[0][:-1], kmer[1][:-1])].add((kmer[0][1:], [kmer[1][1:]]))
 
     return graph
 
@@ -121,13 +135,11 @@ def generate_kmers(k):
         result = tmp
     return result
 
+#############################################################
 
 def main():
-    k = 8
-    kmers = generate_kmers(k)
-    graph = de_bruijn_graph(kmers)
-    cycle = eulerian_cycle(graph)
-    print(format_kmers_path(cycle)[:-(k-1)])
+    (k, gap, graph) = parse_input_kdmers('StringReconstructionFromReadPairs.txt')
+    _ = kd_de_bruijn_graph(graph)
 
 if __name__ == '__main__':
     main()
