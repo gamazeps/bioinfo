@@ -18,7 +18,6 @@ def eulerian_cycle(graph):
         next_node = None
 
         while len(graph[curr]) is not 0:
-            print(curr)
             next_node = graph[curr].pop()
             if len(graph[curr]) is not 0:
                 unexplored_nodes.add(curr)
@@ -37,11 +36,13 @@ def eulerian_cycle(graph):
     while len(unexplored_edges) is not 0:
         new_origin = unexplored_nodes.pop()
         cycle = random_walk(new_origin)
+        index = result.index(new_origin)
+        result = result[:index] + cycle + result[index + 1:]
 
     return result
 
-    #while len(unexplored_edges) is not 0:
-    #    curr_path = random_walk(unexplored_nodes.pop())
+def format_path(path):
+    return '->'.join(map(str, path))
 
 def parse_input(fname):
     workfile = open(fname, 'r')
@@ -57,8 +58,9 @@ def parse_input(fname):
     return graph
 
 def main():
-    input_graph = parse_input('input.txt')
-    print(eulerian_cycle(input_graph))
+    input_graph = parse_input('dataset_203_2.txt')
+    path = eulerian_cycle(input_graph)
+    print(format_path(path))
 
 if __name__ == '__main__':
     main()
