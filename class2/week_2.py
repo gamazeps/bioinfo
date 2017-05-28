@@ -1,6 +1,8 @@
 import collections
 
-def eulerian_cycle(graph):
+########################################################
+
+def eulerian_cycle(graph, root = None):
     unexplored_edges = set()
     unexplored_nodes = set()
 
@@ -27,11 +29,14 @@ def eulerian_cycle(graph):
 
         return path
 
-    # Gets a random key
-    (first_iter_node, values) = graph.popitem()
-    graph[first_iter_node] = values
+    # Gets a random key if needed
+    if root is None:
+        (first_node, values) = graph.popitem()
+        graph[first_node] = values
+    else:
+        first_node = root
 
-    result = random_walk(first_iter_node)
+    result = random_walk(first_node)
 
     while len(unexplored_edges) is not 0:
         new_origin = unexplored_nodes.pop()
@@ -41,10 +46,41 @@ def eulerian_cycle(graph):
 
     return result
 
+def eulerian_path(graph):
+    in_degrees = collections.defaultdict(int)
+    out_degrees = collections.defaultdict(int)
+    degrees = dict()
+    root = None
+
+    for node in graph:
+        for out in graph[node]:
+            in_degrees[out] +=1
+
+    for node in graph:
+        out_degrees[node] = len(graph[node])
+
+    nodes = set(out_degrees.keys()).union(set(in_degrees.keys()))
+
+    for node in nodes:
+        if in_degrees[node] < out_degrees[node]:
+            root = node
+
+    return eulerian_cycle(graph, root)
+
+###############################################################
+
 def format_path(path):
     return '->'.join(map(str, path))
 
-def parse_input(fname):
+def format_kmers_path(path):
+    res = path[0]
+    for elem in path[1:]:
+        res += elem[-1:]
+    return res
+
+#################################################################
+
+def parse_input_graph(fname):
     workfile = open(fname, 'r')
     lines = workfile.readlines()
     lines = map(lambda x: x.strip(), lines)
@@ -57,10 +93,41 @@ def parse_input(fname):
 
     return graph
 
+def parse_input_kmers(fname):
+    workfile = open(fname, 'r')
+    _ = int(workfile.readline().strip())
+    kmers = workfile.readlines()
+    return map(lambda x: x.strip(), kmers)
+
+##############################################################
+
+def de_bruijn_graph(kmers):
+    graph = collections.defaultdict(set)
+
+    for kmer in kmers:
+        graph[kmer[:-1]].add(kmer[1:])
+
+    return graph
+
+##############################################################
+
+def generate_kmers(k):
+    result = set(['0', '1'])
+    for _ in range(1, k):
+        tmp = set()
+        for elem in result:
+            tmp.add(elem + '0')
+            tmp.add(elem + '1')
+        result = tmp
+    return result
+
+
 def main():
-    input_graph = parse_input('dataset_203_2.txt')
-    path = eulerian_cycle(input_graph)
-    print(format_path(path))
+    k = 8
+    kmers = generate_kmers(k)
+    graph = de_bruijn_graph(kmers)
+    cycle = eulerian_cycle(graph)
+    print(format_kmers_path(cycle)[:-(k-1)])
 
 if __name__ == '__main__':
     main()
