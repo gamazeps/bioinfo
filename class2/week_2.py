@@ -2,7 +2,7 @@ import collections
 
 ########################################################
 
-def eulerian_cycle(graph, root = None):
+def eulerian_cycle(graph, root=None):
     unexplored_edges = set()
     unexplored_nodes = set()
 
@@ -49,12 +49,11 @@ def eulerian_cycle(graph, root = None):
 def eulerian_path(graph):
     in_degrees = collections.defaultdict(int)
     out_degrees = collections.defaultdict(int)
-    degrees = dict()
     root = None
 
     for node in graph:
         for out in graph[node]:
-            in_degrees[out] +=1
+            in_degrees[out] += 1
 
     for node in graph:
         out_degrees[node] = len(graph[node])
@@ -77,6 +76,15 @@ def format_kmers_path(path):
     for elem in path[1:]:
         res += elem[-1:]
     return res
+
+def format_kdmers_path(path, k, d):
+    begin = path[0][0]
+    end = path[0][1]
+    for elem in path[1:]:
+        begin += elem[0][-1:]
+        end += elem[1][-1:]
+
+    return begin + end[-(k+d):]
 
 #################################################################
 
@@ -102,7 +110,8 @@ def parse_input_kmers(fname):
 def parse_input_kdmers(fname):
     workfile = open(fname, 'r')
     [k, gap] = map(int, workfile.readline().strip().split(' '))
-    kmers = map(lambda x: x.strip().split('|'), workfile.readlines())
+    lines = workfile.readlines()
+    kmers = list(map(lambda x: x.strip().split('|'), lines))
     return (k, gap, kmers)
 
 ##############################################################
@@ -119,7 +128,7 @@ def kd_de_bruijn_graph(kmers):
     graph = collections.defaultdict(set)
 
     for kmer in kmers:
-        graph[(kmer[0][:-1], kmer[1][:-1])].add((kmer[0][1:], [kmer[1][1:]]))
+        graph[(kmer[0][:-1], kmer[1][:-1])].add((kmer[0][1:], kmer[1][1:]))
 
     return graph
 
@@ -138,8 +147,10 @@ def generate_kmers(k):
 #############################################################
 
 def main():
-    (k, gap, graph) = parse_input_kdmers('StringReconstructionFromReadPairs.txt')
-    _ = kd_de_bruijn_graph(graph)
+    (k, gap, graph) = parse_input_kdmers('dataset_204_15.txt')
+    g = kd_de_bruijn_graph(graph)
+    path = eulerian_path(g)
+    print(format_kdmers_path(path, k, gap))
 
 if __name__ == '__main__':
     main()
