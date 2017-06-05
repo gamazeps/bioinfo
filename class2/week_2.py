@@ -38,7 +38,7 @@ def eulerian_cycle(graph, root=None):
 
     result = random_walk(first_node)
 
-    while len(unexplored_edges) is not 0:
+    while len(unexplored_edges) > 0:
         new_origin = unexplored_nodes.pop()
         cycle = random_walk(new_origin)
         index = result.index(new_origin)
@@ -65,6 +65,7 @@ def eulerian_path(graph):
             root = node
 
     return eulerian_cycle(graph, root)
+
 
 ###############################################################
 
@@ -101,9 +102,14 @@ def parse_input_graph(fname):
 
     return graph
 
-def parse_input_kmers(fname):
+def parse_input_kmers_with_k(fname):
     workfile = open(fname, 'r')
     _ = int(workfile.readline().strip())
+    kmers = workfile.readlines()
+    return map(lambda x: x.strip(), kmers)
+
+def parse_input_kmers(fname):
+    workfile = open(fname, 'r')
     kmers = workfile.readlines()
     return map(lambda x: x.strip(), kmers)
 
@@ -147,9 +153,10 @@ def generate_kmers(k):
 #############################################################
 
 def main():
-    (k, gap, graph) = parse_input_kdmers('dataset_204_15.txt')
-    g = kd_de_bruijn_graph(graph)
-    path = eulerian_path(g)
+    (k, gap, kmers) = parse_input_kdmers('input.txt')
+    graph = kd_de_bruijn_graph(kmers)
+    print(graph)
+    path = eulerian_path(graph)
     print(format_kdmers_path(path, k, gap))
 
 if __name__ == '__main__':
